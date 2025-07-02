@@ -67,11 +67,15 @@ export default function App() {
   if(video){
 
     const shareVideo = () => {
-
+      shareAsync(video.uri).then(()=>{
+        setVideo(undefined)
+      })
     }
 
     const saveVideo = () => {
-      
+      MediaLibrary.saveToLibraryAsync(video.uri).then(()=>{
+        setVideo(undefined);
+      })
     }
 
     return( <VideoPlayer video={video} onShare={shareVideo} onSave={saveVideo} onDiscard={()=>setVideo(undefined)} />);
