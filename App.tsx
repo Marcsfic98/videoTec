@@ -1,18 +1,68 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useState , useEffect , useRef} from 'react';
 
-import {CameraView ,} from "expo-camera"
+import { Camera , CameraRecordingOptions, CameraView } from "expo-camera"
 import { Video } from "expo-av";
 import {shareAsync} from "expo-sharing"
 import * as MediaLibrary from "expo-media-library"
 
+import { VideoPlayer } from './src/components/VideoPlayer';
+import { Cam } from './src/components/Camera';
 
 export default function App() {
+  const cameraRef = useRef<CameraView>(null)
+  const [isRecording , setIsRecording] = useState(false)
+  const [video , setVideo] = useState<any>()
+
+  const [hasCameraPermission , setHasCameraPermission] = useState<boolean> (false)
+  const [hasMicrofonePermission , setHasMicrofonePermission] = useState <boolean>(false)
+  const [hasMediaLibraryPermission , setHasMediaLibraryPermission] = useState <boolean>(false)
+
+
+  useEffect(()=>{
+    (async()=>{
+      const cameraPermission = await Camera.requestCameraPermissionsAsync();
+      const microfonePermission = await Camera.requestMicrophonePermissionsAsync();
+      const mediaLibraryPermission = await MediaLibrary.requestPermissionsAsync();
+
+      setHasCameraPermission(cameraPermission.status === "granted")
+      setHasMicrofonePermission(microfonePermission.status === "granted")
+      setHasMediaLibraryPermission(mediaLibraryPermission.status === "granted")
+    })();
+  },[]);
+
+  if( hasCameraPermission === false || hasMicrofonePermission === false){
+    return <View><Text>Não tem permição</Text></View>
+  }
+
+  if(hasMediaLibraryPermission === false){
+    return <Video><Text>Não tem acesso a biblioteca</Text></Video>
+  }
+
+
+  const recordingVideo = () => {
+    setIsRecording(true);
+
+    const options: CameraRecordingOptions = {
+        maxDuration:10
+    };
+
+    if(cameraRef && cameraRef.current){
+      cameraRef.current.recordAsync(options).then((recordedVideo:any) => {
+        setVideo(recordedVideo);
+        setIsRecording(false);
+    
+      });
+    }
+  }
+
+  const stopRecording = () => {
+    setIsRecording(false);
+
+    
+  }
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      
-    </View>
+   <Cam cameraRef={cameraRef} isRecording={isRecording} onRecording={recordingVideo} onStopRecording={stopRecording}/>
   );
 }
 
