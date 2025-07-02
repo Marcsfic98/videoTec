@@ -59,8 +59,24 @@ export default function App() {
   const stopRecording = () => {
     setIsRecording(false);
 
-    
+    if(cameraRef && cameraRef.current){
+      cameraRef.current.stopRecording();
+    }
+  };
+
+  if(video){
+
+    const shareVideo = () => {
+
+    }
+
+    const saveVideo = () => {
+      
+    }
+
+    return( <VideoPlayer video={video} onShare={shareVideo} onSave={saveVideo} onDiscard={()=>setVideo(undefined)} />);
   }
+
   return (
    <Cam cameraRef={cameraRef} isRecording={isRecording} onRecording={recordingVideo} onStopRecording={stopRecording}/>
   );
